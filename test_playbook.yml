@@ -1,0 +1,7 @@
+---
+- hosts: production
+  tasks:
+    - name: List files in /root
+      command: ls /root
+      become: yes
+      become_method: sudo
