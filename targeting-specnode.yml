@@ -7,9 +7,11 @@
 
 - hosts: web_servers
   tasks:
-    - name: Install Postgres service
+    - name: Install Postgres && Mariadb service
       package:
-        name: postgresql
+        name: 
+          - postgresql
+          - mariadb-server  
         state: present
         update_cache: yes
 
@@ -18,3 +20,9 @@
         name: postgresql
         state: started  
         enabled: yes
+
+    - name: Activating Mariadb service
+      service:
+        name: mariadb
+        state: started
+        enabled: yes     
