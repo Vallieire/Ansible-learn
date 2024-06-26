@@ -1,0 +1,24 @@
+---
+- name: Create user val and configure sudoers
+  hosts: production
+  become: yes
+  tasks:
+    - name: Ensure val user exists with SSH key
+      user:
+        name: val
+        shell: /bin/bash
+        create_home: yes
+        state: present
+
+    - name: Add SSH key for val user
+      authorized_key:
+        user: val
+        key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEXKtrRZ67Gi1tAYuhDRNg+rwsn8lRXhOAmxd2CJ+UNY ansible-learn"
+
+    - name: Copy sudoers configuration file for val
+      copy:
+        src: file/sudoers_val
+        dest: /etc/sudoers.d/val
+        owner: root
+        group: root
+        mode: 0440
