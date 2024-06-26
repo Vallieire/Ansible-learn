@@ -1,6 +1,7 @@
 - hosts: file_servers
   tasks:
     - name: Install Weather app
+      tags: files, Ubuntu1
       snap:
         name: gnome-weather
         state: present
@@ -8,6 +9,7 @@
 - hosts: web_servers
   tasks:
     - name: Install Postgres && Mariadb service
+      tags: service, Ubuntu2
       package:
         name: 
           - postgresql
@@ -16,12 +18,14 @@
         update_cache: yes
 
     - name: Activating Postgres service
+      tags: active, postgresql
       service:
         name: postgresql
         state: started  
         enabled: yes
 
     - name: Activating Mariadb service
+      tags: active, mariadb
       service:
         name: mariadb
         state: started
