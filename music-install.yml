@@ -1,0 +1,21 @@
+---
+- hosts: production
+  gather_facts: yes
+  tasks:
+    - name: install snapd package
+      package:
+        name: snapd
+        state: present
+        update_cache: yes  
+    - name: install Aiva music on node1 only
+      snap:
+        name: aiva
+        state: present
+      when: inventory_hostname == "node1"
+
+    - name: install spotify on node2 only
+      snap:
+        name: spotify
+        state: present
+      when: inventory_hostname == "node2"
+

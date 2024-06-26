@@ -1,14 +1,14 @@
 ---
-
 - hosts: production
   tasks:
-  - name: install apache2 package
+  - name: Install apache2 and libapache2-mod-php packages
     apt:
-      name: apache2
+      name:
+        - apache2
+        - libapache2-mod-php
       state: present
 
-  - name: add php support to apache  
+  - name: Uninstall pip3
     apt:
-      name: libapache2-mod-php
-      state: present  
-
+      name: pip3
+      state: absent

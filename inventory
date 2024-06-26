@@ -1,4 +1,4 @@
 [production]
-node1
-node2
+node1 ansible_host=192.168.30.101
+node2 ansible_host=192.168.30.102
 
