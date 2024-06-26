@@ -1,0 +1,20 @@
+- hosts: file_servers
+  tasks:
+    - name: Install Weather app
+      snap:
+        name: gnome-weather
+        state: present
+
+- hosts: web_servers
+  tasks:
+    - name: Install Postgres service
+      package:
+        name: postgresql
+        state: present
+        update_cache: yes
+
+    - name: Activating Postgres service
+      service:
+        name: postgresql
+        state: started  
+        enabled: yes
