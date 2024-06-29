@@ -1,0 +1,62 @@
+---
+- name: Install Node.js 20.x LTS and Deploy Node.js App
+  hosts: production
+  tasks:
+    - name: Update apt repo and cache
+      apt:
+        update_cache: yes
+        force_apt_get: yes
+        cache_valid_time: 3600
+
+    - name: Add NodeSource APT key
+      apt_key:
+        url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
+
+    - name: Add NodeSource repository for Node.js 20.x LTS
+      apt_repository:
+        repo: "deb https://deb.nodesource.com/node_20.x jammy main"
+        state: present
+        update_cache: yes
+
+
+    - name: Ensure the destination directory exists for the Node.js app
+      file:
+        path: /home/kareem/myapp
+        state: directory
+        mode: 0755
+        owner: kareem
+        group: kareem
+
+    - name: Copy Node.js app archive to the server
+      copy:
+        src: /home/kareem/Ansible-learn/Aws-Docker/myapp.tgz
+        dest: /home/kareem/myapp/myapp.tgz
+
+    - name: Unpack the Node.js app archive
+      unarchive:
+        src: /home/kareem/myapp/myapp.tgz
+        dest: /home/kareem/myapp
+        remote_src: yes
+
+    - name: Install Node.js app dependencies
+      npm:
+        path: /home/kareem/myapp
+
+    - name: Create systemd service for the app
+      template:
+        src: /home/kareem/Ansible-learn/myapp.service.j2
+        dest: /etc/systemd/system/myapp.service
+      notify:
+        - Reload systemd
+
+  handlers:
+    - name: Reload systemd
+      systemd:
+        daemon_reload: yes
+
+    - name: Enable and start the Node.js app service
+      systemd:
+        name: myapp
+        state: started
+        enabled: yes
+

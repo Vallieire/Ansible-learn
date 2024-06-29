@@ -1,0 +1,19 @@
+[Unit]
+Description=My Node.js App
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/node /home/kareem/myapp/src/index.js
+Restart=always
+User=kareem
+Group=kareem
+Environment=PATH=/usr/bin:/usr/local/bin
+Environment=NODE_ENV=production
+WorkingDirectory=/home/kareem/myapp
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=myapp
+
+[Install]
+WantedBy=multi-user.target
+

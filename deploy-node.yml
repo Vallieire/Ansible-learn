@@ -28,7 +28,7 @@
 
     - name: Copy nodejs folder to the server
       copy:
-        src: /home/kareem/Ansible-learn/Aws-Docker-main/myapp.tgz
+        src: /home/kareem/Ansible-learn/Aws-Docker/myapp.tgz
         dest: /home/kareem/myapp/myapp.tgz
 
     - name: Unpack the nodejs file
@@ -42,6 +42,6 @@
         path: /home/kareem/myapp
 
     - name: Start the application
-      command: node /home/kareem/myapp/index.js
+      command: node /home/kareem/myapp/src/index.js
       async: 1000
       poll: 0
