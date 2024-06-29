@@ -1,0 +1,15 @@
+---
+- hosts: production, workstation
+  become: yes
+  tasks:
+    - name: Installing apache and php on Ubuntu and RedHat using vars.
+      package:
+        name: "{{ apache_package_name }}"
+        state: present
+
+    - name: Activating apache service using vars.
+      service:
+        name: "{{ apache_service }}"
+        state: started
+        enabled: yes
+

@@ -1,0 +1,47 @@
+---
+- name: Install nodejs and npm
+  hosts: production
+  tasks:
+    - name: Update apt repo and cache
+      apt:
+        update_cache: yes
+        force_apt_get: yes
+        cache_valid_time: 3600
+
+    - name: Install nodejs and npm
+      package:
+        name:
+          - nodejs
+          - npm
+        state: present
+
+- name: Deploy nodejs app
+  hosts: production
+  tasks:
+    - name: Ensure the destination directory exists
+      file:
+        path: /home/kareem/myapp
+        state: directory
+        mode: 0755
+        owner: kareem
+        group: kareem
+
+    - name: Copy nodejs folder to the server
+      copy:
+        src: /home/kareem/Ansible-learn/Aws-Docker-main/myapp.tgz
+        dest: /home/kareem/myapp/myapp.tgz
+
+    - name: Unpack the nodejs file
+      unarchive:
+        src: /home/kareem/myapp/myapp.tgz
+        dest: /home/kareem/myapp
+        remote_src: yes
+
+    - name: Install dependencies
+      npm:
+        path: /home/kareem/myapp
+
+    - name: Start the application
+      command: node /home/kareem/myapp/index.js
+      async: 1000
+      poll: 0
