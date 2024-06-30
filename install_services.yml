@@ -1,0 +1,61 @@
+---
+- name: Install and configure databases
+  hosts: production
+
+  tasks:
+    - name: Add PostgreSQL repository (Ubuntu example)
+      become: yes
+      apt_repository:
+        repo: deb http://apt.postgresql.org/pub/repos/apt/ jammy-pgdg main
+        state: present
+        update_cache: yes
+        filename: pgdg.list
+
+    - name: Install PostgreSQL
+      become: yes
+      apt:
+        name: postgresql
+        state: present
+
+    - name: Start and enable PostgreSQL service
+      become: yes
+      service:
+        name: postgresql
+        state: started
+        enabled: yes
+
+    - name: Install Redis
+      become: yes
+      apt:
+        name: redis-server
+        state: present
+
+    - name: Start and enable Redis service
+      become: yes
+      service:
+        name: redis-server
+        state: started
+        enabled: yes
+
+    - name: Add MongoDB repository and install MongoDB (Ubuntu example)
+      become: yes
+      apt_repository:
+        repo: deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/5.0 multiverse
+        state: present
+        update_cache: yes
+        filename: mongodb-org-5.0.list
+
+    - name: Install MongoDB
+      become: yes
+      apt:
+        name: mongodb-org
+        state: present
+        update_cache: yes
+
+    - name: Start and enable MongoDB service
+      become: yes
+      service:
+        name: mongod
+        state: started
+        enabled: yes
+

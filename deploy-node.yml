@@ -1,19 +1,24 @@
----
-- name: Install nodejs and npm
+- name: Install nodejs and npm if not installed
   hosts: production
   tasks:
     - name: Update apt repo and cache
       apt:
         update_cache: yes
-        force_apt_get: yes
         cache_valid_time: 3600
 
-    - name: Install nodejs and npm
-      package:
+    - name: Check if Node.js and npm are installed
+      command: dpkg -l nodejs npm
+      register: node_check
+      changed_when: false
+
+    - name: Install Node.js and npm if not installed
+      apt:
         name:
           - nodejs
           - npm
-        state: present
+        state: latest
+        update_cache: yes
+      when: "'nodejs' not in node_check.stdout or 'npm' not in node_check.stdout"
 
 - name: Deploy nodejs app
   hosts: production
@@ -45,3 +50,4 @@
       command: node /home/kareem/myapp/src/index.js
       async: 1000
       poll: 0
+

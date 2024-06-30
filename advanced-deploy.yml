@@ -1,0 +1,112 @@
+- name: Advanced Node Deploy
+  hosts: production
+  tasks:
+    - name: Update apt repo and cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Check if Node.js and npm are installed
+      command: dpkg -l nodejs npm
+      register: node_check
+      changed_when: false
+
+    - name: Install Node.js and npm if not installed
+      apt:
+        name:
+          - nodejs
+          - npm
+        state: present
+        update_cache: yes
+      when: "'nodejs' not in node_check.stdout or 'npm' not in node_check.stdout"
+
+- name: Download Redis
+  hosts: production
+  tasks:
+    - name: Check if Redis is installed
+      command: dpkg -l redis-server
+      register: redis_check
+      changed_when: false
+
+    - name: Install Redis server if not installed
+      apt:
+        name: redis-server
+        state: present
+        update_cache: yes
+      when: "'redis-server' not in redis_check.stdout"
+
+- name: Setup PostgreSQL and MongoDB
+  hosts: production
+  tasks:
+    - name: Check if PostgreSQL client is installed
+      command: dpkg -l postgresql-client
+      register: postgresql_check
+      changed_when: false
+
+    - name: Install PostgreSQL client if not installed
+      apt:
+        name: postgresql-client
+        state: present
+        update_cache: yes
+      when: "'postgresql-client' not in postgresql_check.stdout"
+
+    - name: Check if MongoDB is installed
+      command: dpkg -l mongodb
+      register: mongodb_check
+      changed_when: false
+
+    - name: Install MongoDB if not installed
+      apt:
+        name: mongodb
+        state: present
+        update_cache: yes
+      when: "'mongodb' not in mongodb_check.stdout"
+
+- name: Configure PostgreSQL and MongoDB
+  hosts: production
+  vars_files:
+    - deploy-node-vault.yml  
+  tasks:
+  
+    - name: Add PostgreSQL user and database
+      become: yes
+      shell: |
+        sudo -u postgres psql -c "CREATE USER kareem WITH PASSWORD '{{ postgres_password }}';"
+        sudo -u postgres psql -c "CREATE DATABASE mydatabase;"
+        sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE mydatabase TO kareem;"
+
+    - name: Configure MongoDB
+      shell: |
+        mongosh --eval 'use admin; db.createUser({ user: "root", pwd: "{{ mongodb_password }}", roles: [ { role: "userAdminAnyDatabase", db: "admin" }, "readWriteAnyDatabase" ]});'
+
+- name: Deploy nodejs app
+  hosts: production
+  tasks:
+    - name: Ensure the destination directory exists
+      file:
+        path: /home/kareem/myapp
+        state: directory
+        mode: 0755
+        owner: kareem
+        group: kareem
+
+    - name: Copy nodejs folder to the server
+      copy:
+        src: /home/kareem/Ansible-learn/Aws-Docker/myapp.tgz
+        dest: /home/kareem/myapp/myapp.tgz
+
+    - name: Unpack the nodejs file
+      unarchive:
+        src: /home/kareem/myapp/myapp.tgz
+        dest: /home/kareem/myapp
+        remote_src: yes
+
+    - name: Install dependencies
+      npm:
+        path: /home/kareem/myapp
+
+    - name: Start the application
+      command: node /home/kareem/myapp/src/index.js
+      async: 1000
+      poll: 0
+
