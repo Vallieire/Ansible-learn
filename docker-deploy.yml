@@ -1,0 +1,83 @@
+---
+- hosts: production
+  name: Deploying docker and docker-compose
+  tasks:
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+
+    - name: Install docker-ce and docker-ce-cli
+      apt:
+        name:
+          - docker
+        state: present
+        update_cache: yes
+
+    - name: Start and enable docker
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Remove old Docker Compose binary if exists
+      become: yes
+      file:
+        path: /usr/local/bin/docker-compose
+        state: absent
+      
+    - name: Create directory for Docker Compose plugin
+      file:
+        path: /usr/local/lib/docker/cli-plugins
+        state: directory
+        mode: '0755'      
+
+
+    - name: Download Docker Compose v2.28.1
+      become: yes
+      command: >
+        curl -SL https://github.com/docker/compose/releases/download/v2.28.1/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
+      args:
+        creates: /usr/local/lib/docker/cli-plugins/docker-compose
+
+    - name: Make Docker Compose executable
+      become: yes
+      file:
+        path: /usr/local/lib/docker/cli-plugins/docker-compose
+        mode: 'a+x'
+
+    - name: Add user to docker group
+      user:
+        name: kareem
+        groups: docker
+        append: yes
+
+    - name: Reconnect to server
+      meta: reset_connection
+
+    - name: Test docker pull
+      community.docker.docker_image:
+        name: redis
+        source: pull
+
+- hosts: production
+  name: Start Docker Container
+  vars_prompt:
+    #- name: docker_username
+      #prompt: Enter Docker username for your repo
+    #- name: docker_password
+      #prompt: Enter password for registry  
+  tasks:
+
+    #- name: Docker login
+      #community.docker.docker_login:
+        #username: "{{ docker_username }}"
+        #password: "{{ docker_password }}"
+
+    - name: Start containers from docker-compose
+      community.docker.docker_compose_v2:
+        project_src: /home/kareem/myapp
+        state: present
+
+

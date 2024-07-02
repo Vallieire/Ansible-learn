@@ -20,7 +20,7 @@
         update_cache: yes
       when: "'nodejs' not in node_check.stdout or 'npm' not in node_check.stdout"
 
-- name: Download Redis
+- name: Download Services
   hosts: production
   tasks:
     - name: Check if Redis is installed
@@ -109,4 +109,7 @@
       command: node /home/kareem/myapp/src/index.js
       async: 1000
       poll: 0
-
+    - name: Ensure App is running
+      shell: ps aux | grep node
+      register: app_status
+    - debug: msg={{app_status.stdout_lines}}    
