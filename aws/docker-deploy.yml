@@ -1,6 +1,6 @@
 ---
 - name: Deploying docker and docker-compose
-  hosts: production
+  hosts: all
   become: true
   tasks:
     - name: Add Docker GPG apt Key
@@ -56,7 +56,7 @@
 
     - name: Add user to docker group
       user:
-        name: kareem
+        name: ubuntu
         groups: docker
         append: yes
 
@@ -68,7 +68,7 @@
         name: redis
         source: pull
 
-- hosts: production
+- hosts: all
   name: Start Docker Container
   vars_prompt:
     #- name: docker_username
@@ -81,9 +81,13 @@
       #community.docker.docker_login:
         #username: "{{ docker_username }}"
         #password: "{{ docker_password }}"
-    
+    - name: Copy docker-compose file
+      copy:
+        src: /home/kareem/Ansible-learn/Aws-Docker/docker-compose.yml
+        dest: /home/ubuntu  
+
     - name: Start containers from docker-compose
       community.docker.docker_compose_v2:
-        project_src: /home/kareem/myapp
+        project_src: /home/ubuntu
         state: present   #docker-compose up
 

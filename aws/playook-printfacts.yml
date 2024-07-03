@@ -1,0 +1,9 @@
+---
+- name: Print facts
+  hosts: production
+  tasks:
+    - name: Print fact
+      debug:
+        msg: "Print facts, {{ ansible_date_time.month }},  {{ ansible_date_time.year }}, {{ ansible_default_ipv4.address }}"
+...          
+

@@ -1,0 +1,9 @@
+---
+- name: Playbook to print private DNS
+  hosts: aws_ec2
+  gather_facts: no
+  tasks:
+    - name: Print the private DNS name
+      debug:
+        msg: "Private DNS: {{ ansible_private_dns_name }}"
+
